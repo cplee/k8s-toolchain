@@ -2,4 +2,5 @@ dependencies:
   - name: postgresql
     version: "*"
     condition: postgresql.enabled
-    repository: "alias:stable"
+    #repository: "alias:stable"
+    repository: "file://./vendored_charts/postgresql"
