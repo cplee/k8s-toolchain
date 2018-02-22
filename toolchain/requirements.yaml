@@ -1,0 +1,12 @@
+dependencies:
+  - name: jenkins
+    version: "*"
+    repository: "alias:stable"
+  - name: clair
+    version: "*"
+    repository: "file://../vendored_charts/clair"
+  - name: postgresql
+    version: "*"
+    condition: postgresql.enabled
+    #repository: "alias:stable"
+    repository: "file://../vendored_charts/postgresql"
