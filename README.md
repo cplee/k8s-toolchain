@@ -8,6 +8,9 @@
 * helm install toolchain -f local-values.yml -n toolchain
 
 # Login to Jenkins
-* URL: `kubectl get services toolchain-jenkins -o jsonpath='http://localhost:{.spec.ports[0].nodePort}'`
+* URL: http://localhost:30080
 * Username: admin
 * Password: `kubectl get secret toolchain-jenkins -o jsonpath='{.data.jenkins-admin-password}' | base64 -D`
+
+# View Jenkins logs
+* kubectl logs -lcomponent=toolchain-jenkins-master 

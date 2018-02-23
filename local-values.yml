@@ -1,7 +1,76 @@
 
 jenkins:
+  Agent:
+    Privileged: true
   Master:
+    NodePort: 30080
     ServiceType: NodePort
+    InstallPlugins:
+    - kubernetes:1.3.1
+    - workflow-aggregator:2.5
+    - workflow-job:2.17
+    - credentials-binding:1.15
+    - git:3.7.0
+    InitScripts:
+    - |
+      // Agent idle time - 5 mins
+      import jenkins.model.Jenkins
+
+      if(!Jenkins.instance.isQuietingDown()) {
+          def j = Jenkins.instance
+          j.clouds[0].templates[0].idleMinutes = 300
+      } else {
+          println "Shutdown mode enabled.  Configure CSRF protection SKIPPED."
+      }
+    - |
+      // CSRF
+      import hudson.security.csrf.DefaultCrumbIssuer
+      import jenkins.model.Jenkins
+
+      if(!Jenkins.instance.isQuietingDown()) {
+          def j = Jenkins.instance
+          if(j.getCrumbIssuer() == null) {
+              j.setCrumbIssuer(new DefaultCrumbIssuer(true))
+              j.save()
+              println 'CSRF Protection configuration has changed.  Enabled CSRF Protection.'
+          }
+          else {
+              println 'Nothing changed.  CSRF Protection already configured.'
+          }
+      }
+      else {
+          println "Shutdown mode enabled.  Configure CSRF protection SKIPPED."
+      }
+    - |
+      // DISABLE CLI
+      import jenkins.model.Jenkins
+
+      if(!Jenkins.instance.isQuietingDown()) {
+        jenkins.model.Jenkins.instance.getDescriptor("jenkins.CLI").get().setEnabled(false)
+      } else {
+          println 'Shutdown mode enabled.  Disable CLI SKIPPED.'
+      }
+
+    - |
+      // DISABLE OLD AGENT PROTOCOLS
+      import jenkins.model.Jenkins
+      Jenkins j = Jenkins.instance
+
+      if(!j.isQuietingDown()) {
+          Set<String> agentProtocolsList = ['JNLP4-connect', 'Ping']
+          if(!j.getAgentProtocols().equals(agentProtocolsList)) {
+              j.setAgentProtocols(agentProtocolsList)
+              println "Agent Protocols have changed.  Setting: ${agentProtocolsList}"
+              j.save()
+          }
+          else {
+              println "Nothing changed.  Agent Protocols already configured: ${j.getAgentProtocols()}"
+          }
+      }
+      else {
+          println 'Shutdown mode enabled.  Configure Agent Protocols SKIPPED.'
+      }
+
 
 clair:
   replicaCount: 1
