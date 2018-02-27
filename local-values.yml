@@ -1,4 +1,3 @@
-
 jenkins:
   Agent:
     Privileged: true
@@ -14,8 +13,26 @@ jenkins:
     - workflow-aggregator:2.5
     - workflow-job:2.17
     - credentials-binding:1.15
-    - git:3.7.0
+    - git:3.8.0
     InitScripts:
+    - |
+      // Docker access and agent idle time - 5 mins
+      import jenkins.model.Jenkins
+      import org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate
+      if(!Jenkins.instance.isQuietingDown()) {
+          def j = Jenkins.instance
+          j.clouds[0].templates[0].idleMinutes = 300
+          dockerContainer = new ContainerTemplate('docker', 'docker') 
+          dockerContainer.with {
+            command='/bin/sh -c'
+            args='cat'
+            privileged=true
+            ttyEnabled=true
+          }
+          j.clouds[0].templates[0].containers[1] = dockerContainer
+      } else {
+          println "Shutdown mode enabled.  Configure CSRF protection SKIPPED."
+      }
     - |
       // CSRF
       import hudson.security.csrf.DefaultCrumbIssuer
