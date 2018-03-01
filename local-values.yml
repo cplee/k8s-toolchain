@@ -30,6 +30,14 @@ jenkins:
             ttyEnabled=true
           }
           j.clouds[0].templates[0].containers[1] = dockerContainer
+
+          helmContainer = new ContainerTemplate('helm', 'cplee/k8s-helm:v2.8.1') 
+          helmContainer.with {
+            command='/bin/sh -c'
+            args='cat'
+            ttyEnabled=true
+          }
+          j.clouds[0].templates[0].containers[2] = helmContainer
       } else {
           println "Shutdown mode enabled.  Configure CSRF protection SKIPPED."
       }
