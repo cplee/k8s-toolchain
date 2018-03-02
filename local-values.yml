@@ -21,7 +21,7 @@ jenkins:
       import org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate
       if(!Jenkins.instance.isQuietingDown()) {
           def j = Jenkins.instance
-          j.clouds[0].templates[0].idleMinutes = 300
+          j.clouds[0].templates[0].idleMinutes = 5
           dockerContainer = new ContainerTemplate('docker', 'docker') 
           dockerContainer.with {
             command='/bin/sh -c'
@@ -38,6 +38,22 @@ jenkins:
             ttyEnabled=true
           }
           j.clouds[0].templates[0].containers[2] = helmContainer
+
+          regContainer = new ContainerTemplate('reg', 'cplee/reg') 
+          regContainer.with {
+            command='/bin/sh -c'
+            args='cat'
+            ttyEnabled=true
+          }
+          j.clouds[0].templates[0].containers[3] = regContainer
+
+          skopeoContainer = new ContainerTemplate('skopeo', 'runcom/skopeo') 
+          skopeoContainer.with {
+            command='/bin/sh -c'
+            args='cat'
+            ttyEnabled=true
+          }
+          j.clouds[0].templates[0].containers[4] = skopeoContainer
       } else {
           println "Shutdown mode enabled.  Configure CSRF protection SKIPPED."
       }
@@ -90,14 +106,16 @@ jenkins:
           println 'Shutdown mode enabled.  Configure Agent Protocols SKIPPED.'
       }
 
+docker-registry:
+ tlsSecretName: toolchain-docker-registry 
 
 clair:
   replicaCount: 1
   logLevel: info
   insecureTls: false
   image:
-    repository: quay.io/coreos/clair-git
-    tag: latest
+    repository: quay.io/coreos/clair
+    tag: v2.0.1
     pullPolicy: Always
   service:
     name: clair

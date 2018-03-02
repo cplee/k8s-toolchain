@@ -1,7 +1,11 @@
 # Setup
 * brew install kubernetes-helm
 * helm init
-* helm install stable/kubernetes-dashboard
+
+# TLS
+* openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /tmp/tls.key -out /tmp/tls.crt -subj "/CN=toolchain-docker-registry"
+* sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /tmp/tls.crt
+* kubectl create secret tls toolchain-docker-registry.tls --key /tmp/tls.key --cert /tmp/tls.crt 
 
 # Deploy
 * helm dependency update toolchain

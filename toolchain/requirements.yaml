@@ -5,6 +5,9 @@ dependencies:
   - name: clair
     version: "*"
     repository: "file://./vendored_charts/clair"
+  - name: docker-registry
+    version: "*"
+    repository: "file://./vendored_charts/docker-registry"
   - name: postgresql
     version: "*"
     condition: postgresql.enabled
