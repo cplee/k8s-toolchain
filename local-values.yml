@@ -22,38 +22,23 @@ jenkins:
       if(!Jenkins.instance.isQuietingDown()) {
           def j = Jenkins.instance
           j.clouds[0].templates[0].idleMinutes = 5
-          dockerContainer = new ContainerTemplate('docker', 'docker') 
-          dockerContainer.with {
-            command='/bin/sh -c'
-            args='cat'
-            privileged=true
-            ttyEnabled=true
-          }
-          j.clouds[0].templates[0].containers[1] = dockerContainer
 
-          helmContainer = new ContainerTemplate('helm', 'cplee/k8s-helm:v2.8.1') 
-          helmContainer.with {
-            command='/bin/sh -c'
-            args='cat'
-            ttyEnabled=true
+          [
+            docker: 'docker:latest', 
+            helm: 'cplee/k8s-helm:v2.8.1',
+            reg: 'cplee/reg:latest',
+            skopeo: 'runcom/skopeo:latest',
+            goss: 'aelsabbahy/goss:v0.3.5'
+          ].eachWithIndex{ item, i -> 
+            def c = new ContainerTemplate(item.key, item.value) 
+            c.with {
+              command='/bin/sh -c'
+              args='cat'
+              privileged=true
+              ttyEnabled=true
+            }
+            j.clouds[0].templates[0].containers[i] = c
           }
-          j.clouds[0].templates[0].containers[2] = helmContainer
-
-          regContainer = new ContainerTemplate('reg', 'cplee/reg') 
-          regContainer.with {
-            command='/bin/sh -c'
-            args='cat'
-            ttyEnabled=true
-          }
-          j.clouds[0].templates[0].containers[3] = regContainer
-
-          skopeoContainer = new ContainerTemplate('skopeo', 'runcom/skopeo') 
-          skopeoContainer.with {
-            command='/bin/sh -c'
-            args='cat'
-            ttyEnabled=true
-          }
-          j.clouds[0].templates[0].containers[4] = skopeoContainer
       } else {
           println "Shutdown mode enabled.  Configure CSRF protection SKIPPED."
       }
@@ -112,7 +97,7 @@ docker-registry:
 clair:
   replicaCount: 1
   logLevel: info
-  insecureTls: false
+  insecureTls: true
   image:
     repository: quay.io/coreos/clair
     tag: v2.0.1
@@ -167,19 +152,21 @@ clair:
     - rpm
 
   postgresql:
-    postgresUser: clair
-    postgresPassword: clair
-    postgresDatabase: clair
+    postgresUser: postgres
+    postgresPassword: password
+    postgresDatabase: postgres
 
 postgresql:
+  image: arminc/clair-db
+  imageTag: 2018-03-04
   enabled: true
   cpu: 1000m
   memory: 1Gi
 # These values are hardcoded until Helm supports secrets.
 # For more info see: https://github.com/kubernetes/helm/issues/2196
-  postgresUser: clair
-  postgresPassword: clair
-  postgresDatabase: clair
+  postgresUser: postgres
+  postgresPassword: password
+  postgresDatabase: postgres
 
   persistence:
     size: 10Gi
