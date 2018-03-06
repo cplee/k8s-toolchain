@@ -14,7 +14,10 @@
 * Password: `kubectl get secret toolchain-jenkins -o jsonpath='{.data.jenkins-admin-password}' | base64 -D`
 
 # Deploy AWS
-* helm install toolchain -f aws-values.yml -n toolchain
+* helm install toolchain -n toolchain
+* URL: kubectl get svc toolchain-jenkins -o jsonpath='{ .status.loadBalancer.ingress[0].hostname }'
+* Username: admin
+* Password: `kubectl get secret toolchain-jenkins -o jsonpath='{.data.jenkins-admin-password}' | base64 -D`
 
 # View Jenkins logs
 * kubectl logs -lcomponent=toolchain-jenkins-master 
