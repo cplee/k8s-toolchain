@@ -1,3 +1,19 @@
+# Overview
+Helm chart to deploy a CI/CD toolchain on kubernetes.
+<img src="docs/toolchain.png?raw=true">
+
+# Build
+<img src="docs/build.png?raw=true">
+
+* Build docker image
+* Vulnerability static analysis of image with [Clair](https://github.com/coreos/clair)
+
+# Deploy
+<img src="docs/deploy.png?raw=true">
+
+* Deploy image with [Helm](https://github.com/kubernetes/helm)
+* Test with [Goss](https://github.com/aelsabbahy/goss)
+
 # Setup
 * brew install kubernetes-helm
 * helm init
